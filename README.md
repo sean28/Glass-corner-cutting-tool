@@ -1,1 +1,0 @@
-# Glass-corner-cutting-tool
