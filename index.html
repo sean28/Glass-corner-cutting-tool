@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>玻璃圆角裁切工具</title>
+  <title>玻璃圆角裁切工具（自适应版）</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f0f0f0; }
     #preview-container { position: relative; display: inline-block; background: transparent; overflow: hidden; }
@@ -16,7 +16,7 @@
   </div>
   <input type="file" id="fileInput" accept="image/*"><br><br>
   <div id="controls" style="display:none;">
-    圆角半径: <input type="range" id="radiusRange" min="0" max="100" value="40">
+    圆角半径: <input type="range" id="radiusRange" min="0" max="500" value="40">
     <span id="radiusValue">40</span>px<br><br>
     背景模式:
     <select id="modeSelect">
@@ -27,14 +27,14 @@
   </div>
 
   <div id="preview-container">
-    <svg id="svgPreview" width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+    <svg id="svgPreview" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <clipPath id="clipRounded">
-          <rect id="clipRect" x="0" y="0" width="100%" height="100%" rx="40" ry="40"/>
+          <rect id="clipRect" x="0" y="0" rx="40" ry="40"/>
         </clipPath>
       </defs>
-      <rect id="bgRect" x="0" y="0" width="100%" height="100%" fill="black" visibility="hidden"/>
-      <image id="uploadedImage" href="" x="0" y="0" width="600" height="400"
+      <rect id="bgRect" x="0" y="0" fill="black" visibility="hidden"/>
+      <image id="uploadedImage" href=""
              preserveAspectRatio="xMidYMid meet" clip-path="url(#clipRounded)" />
     </svg>
   </div>
@@ -51,14 +51,40 @@
     const controls = document.getElementById('controls');
     const downloadBtn = document.getElementById('downloadBtn');
 
+    let imgWidth = 600;
+    let imgHeight = 400;
+
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function(event) {
-        imageEl.setAttribute('href', event.target.result);
-        controls.style.display = 'block';
-        updateMask();
+        const img = new Image();
+        img.onload = function() {
+          imgWidth = img.naturalWidth;
+          imgHeight = img.naturalHeight;
+
+          // 限制最大尺寸，防止超大图太大
+          const maxW = 1000;
+          const scale = imgWidth > maxW ? maxW / imgWidth : 1;
+
+          imgWidth = imgWidth * scale;
+          imgHeight = imgHeight * scale;
+
+          svg.setAttribute('width', imgWidth);
+          svg.setAttribute('height', imgHeight);
+          clipRect.setAttribute('width', imgWidth);
+          clipRect.setAttribute('height', imgHeight);
+          bgRect.setAttribute('width', imgWidth);
+          bgRect.setAttribute('height', imgHeight);
+          imageEl.setAttribute('width', imgWidth);
+          imageEl.setAttribute('height', imgHeight);
+          imageEl.setAttribute('href', event.target.result);
+
+          controls.style.display = 'block';
+          updateMask();
+        }
+        img.src = event.target.result;
       }
       reader.readAsDataURL(file);
     });
