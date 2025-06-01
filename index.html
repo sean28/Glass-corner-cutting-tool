@@ -1,41 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>玻璃圆角裁切工具（自适应版）</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; background: #f0f0f0; }
-    #preview-container { position: relative; display: inline-block; background: transparent; overflow: hidden; }
-    svg { max-width: 100%; height: auto; display: block; background: transparent; }
-  </style>
+  <title>玻璃圆角裁切工具</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap"
+    rel="stylesheet">
+    <style>:root{--primary-color:#5A67D8;/* Slightly deeper blue-purple */
+      --primary-light:#7F9CF5;--accent-color:#38A169;/* A nice green for download button */
+      --background-light:#e0e0e0;/* Lighter background */
+      --card-background:#FFFFFF;--text-color-dark:#2D3748;/* Darker text for readability */
+      --text-color-light:#718096;--border-color:#EDF2F7;--shadow-subtle:rgba(0, 0, 0, 0.05);--shadow-medium:rgba(0, 0, 0, 0.1);--shadow-strong:rgba(0, 0, 0, 0.15);}
+      body{font-family:'Roboto', 'Noto Sans SC', sans-serif;text-align:center;padding:20px;background:var(--background-light);color:var(--text-color-dark);display:flex;flex-direction:column;align-items:center;min-height:100vh;margin:0;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+      h2{color:var(--primary-color);margin-bottom:4px;font-weight:700;font-size:2em;letter-spacing:-0.02em;}
+      .subtitle{font-size:1.05em;color:var(--text-color-light);margin-top:5px;margin-bottom:10px;}
+      .card{background:var(--card-background);border-radius:16px;box-shadow:0 10px 25px var(--shadow-subtle);padding:15px;margin-bottom:10px;width:50%;max-width:700px;box-sizing:border-box;border:1px solid var(--border-color);transition:all 0.3s ease;}
+      .card:hover{box-shadow:0 15px 35px var(--shadow-medium);}
+      input[type="file"]{display:none;}
+      .custom-file-upload{display:inline-flex;/* Use flex for alignment */
+      align-items:center;gap:8px;/* Space between icon and text */
+      padding:12px 28px;background-color:var(--primary-color);color:white;border-radius:10px;cursor:pointer;font-size:1.15em;font-weight:500;transition:background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;margin-bottom:5px;box-shadow:0 5px 15px var(--shadow-subtle);}
+      .custom-file-upload:hover{background-color:var(--primary-light);transform:translateY(-3px);box-shadow:0 8px 20px var(--shadow-medium);}
+      .custom-file-upload svg{fill:currentColor;/* Inherit color from parent */
+      width:20px;height:20px;}
+      #controls{display:none;/* Controlled by JS */flex-direction:column;gap:25px;margin-top:5px;padding-top:25px;border-top:1px dashed var(--border-color);}
+      #controls div{display:flex;align-items:center;justify-content:space-between;/* Space out items */gap:15px;font-size:1.05em;color:var(--text-color-dark);flex-wrap:wrap;/* Allow wrapping on smaller screens */}
+      #controls div span:first-child{min-width:80px;/* Align labels */text-align:left;}
+      input[type="range"]{flex-grow:1;/* Take available space */
+      -webkit-appearance:none;height:6px;background:var(--border-color);border-radius:3px;outline:none;transition:background 0.3s ease;margin:0 10px;}
+      input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;background:var(--primary-color);border-radius:50%;cursor:grab;box-shadow:0 2px 8px var(--shadow-subtle);transition:background-color 0.3s ease, transform 0.2s ease;}
+      input[type="range"]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.1);}
+      input[type="range"]::-webkit-slider-thumb:hover{background-color:var(--primary-light);}
+      select{padding:10px 18px;border:1px solid var(--border-color);border-radius:8px;background-color:var(--card-background);font-size:1em;color:var(--text-color-dark);cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23718096%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-6.5%200-12.3%203.1-16.1%208.1a17.6%2017.6%200%200%00-3.5%2018.8l128.8%20128.9a17.6%2017.6%200%200%200%2025.2%200l128.9-128.9c3.9-3.9%205.1-8.5%203.5-13.3z%22%2F%3E%3C%2Fsvg%3E');background-repeat:no-repeat;background-position:right 15px center;background-size:10px auto;transition:border-color 0.3s ease, box-shadow 0.3s ease;}
+      select:focus{outline:none;border-color:var(--primary-light);box-shadow:0 0 0 3px rgba(90, 103, 216, 0.15);}
+      button{padding:12px 30px;background-color:var(--accent-color);color:white;border:none;border-radius:10px;cursor:pointer;font-size:1.15em;font-weight:500;transition:background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;box-shadow:0 5px 15px var(--shadow-subtle);margin-top:5px;/* Space from select */}
+      button:hover{background-color:#2F855A;/* Darker green */
+      transform:translateY(-3px);box-shadow:0 8px 20px var(--shadow-medium);}
+      #preview-container { position: relative; display: inline-block; background: transparent; overflow: hidden; }
+      height:auto;}
+      svg{max-width:100%;height:auto;display:block;background:transparent;border-radius:16px;/* Match container */}
+      /* Responsive adjustments */
+      @media (max-width:768px){body{padding:15px;}
+      .card{padding:25px;border-radius:12px;}
+      h2{font-size:2em;}
+      .subtitle{font-size:0.95em;margin-bottom:5px;}
+      .custom-file-upload,
+      button{padding:10px 20px;font-size:1em;border-radius:8px;}
+      #controls div{flex-direction:column;align-items:flex-start;gap:10px;}
+      input[type="range"]{width:100%;margin:0;}
+      #controls div span:first-child{min-width:auto;text-align:left;}}
+    </style>
 </head>
+
 <body>
-  <h2>玻璃圆角裁切工具</h2>
-  <div style="text-align: center; line-height: 1.5; font-size: 16px; margin-top: -10px; margin-bottom: 20px;">
-    Made by Dr. Sean Group<br>
-  </div>
-  <input type="file" id="fileInput" accept="image/*"><br><br>
-  <div id="controls" style="display:none;">
-    圆角半径: <input type="range" id="radiusRange" min="0" max="500" value="40">
-    <span id="radiusValue">40</span>px<br><br>
-    背景模式:
-    <select id="modeSelect">
-      <option value="transparent">透明背景</option>
-      <option value="black">黑色背景</option>
-    </select><br><br>
-    <button id="downloadBtn">下载高清图片</button>
+  <div class="card">
+    <h2>玻璃圆角裁切工具</h2>
+    <p class="subtitle">
+      Made by Dr. Sean Group
+    </p>
+    <label for="fileInput" class="custom-file-upload">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z" />
+      </svg>
+      选择一张图片
+    </label>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div id="controls">
+      <div>
+        <span>圆角半径:</span>
+        <input type="range" id="radiusRange" min="0" max="500" value="25">
+        <span id="radiusValue">25</span>px
+      </div>
+      <div>
+        <span>背景模式:</span>
+        <select id="modeSelect">
+          <option value="transparent">透明背景</option>
+          <option value="black">黑色背景</option>
+        </select>
+      </div>
+      <button id="downloadBtn">下载高清图片</button>
+    </div>
   </div>
 
   <div id="preview-container">
     <svg id="svgPreview" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <clipPath id="clipRounded">
-          <rect id="clipRect" x="0" y="0" rx="40" ry="40"/>
+          <rect id="clipRect" x="0" y="0" rx="40" ry="40" />
         </clipPath>
       </defs>
-      <rect id="bgRect" x="0" y="0" fill="black" visibility="hidden"/>
-      <image id="uploadedImage" href=""
-             preserveAspectRatio="xMidYMid meet" clip-path="url(#clipRounded)" />
+      <rect id="bgRect" x="0" y="0" fill="black" visibility="hidden" />
+      <image id="uploadedImage" href="" preserveAspectRatio="xMidYMid meet" clip-path="url(#clipRounded)" />
     </svg>
   </div>
 
@@ -58,9 +115,9 @@
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
           imgWidth = img.naturalWidth;
           imgHeight = img.naturalHeight;
 
@@ -81,7 +138,7 @@
           imageEl.setAttribute('height', imgHeight);
           imageEl.setAttribute('href', event.target.result);
 
-          controls.style.display = 'block';
+          controls.style.display = 'flex'; // Changed to flex for better layout
           updateMask();
         }
         img.src = event.target.result;
@@ -97,6 +154,8 @@
 
       if (modeSelect.value === 'black') {
         bgRect.setAttribute('visibility', 'visible');
+        // SVG background isn't part of the canvas export, so setting both for visual consistency.
+        // For download, the rect within SVG handles the background.
         svg.style.background = 'black';
       } else {
         bgRect.setAttribute('visibility', 'hidden');
@@ -111,7 +170,7 @@
       const svgData = new XMLSerializer().serializeToString(svg);
       const canvas = document.createElement('canvas');
 
-      const scale = 2; // 超采样比例
+      const scale = 2; // 超采样比例，提高下载图片质量
       const w = svg.width.baseVal.value;
       const h = svg.height.baseVal.value;
 
@@ -120,23 +179,33 @@
 
       const ctx = canvas.getContext('2d');
       const img = new Image();
-      const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
 
-      img.onload = function() {
-        ctx.save();
-        ctx.scale(scale, scale);  // 放大坐标系
-        ctx.drawImage(img, 0, 0, w, h); // 按正常比例绘制
-        ctx.restore();
+      img.onload = function () {
+        // 使用 setTimeout 确保浏览器有足够时间渲染 SVG
+        setTimeout(() => {
+          ctx.save();
+          ctx.scale(scale, scale);
+          ctx.drawImage(img, 0, 0, w, h);
+          ctx.restore();
 
+          URL.revokeObjectURL(url);
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = 'rounded_image_hd.png';
+          a.click();
+        }, 100); // 稍长一点的延迟，提高稳定性
+      };
+
+      img.onerror = function () {
+        alert('图片加载失败，请稍后再试！');
         URL.revokeObjectURL(url);
-        const a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = 'rounded_image_hd.png';
-        a.click();
-      }
+      };
+
       img.src = url;
     });
   </script>
 </body>
+
 </html>
